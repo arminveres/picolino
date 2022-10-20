@@ -1,9 +1,13 @@
 cmake_minimum_required(VERSION 3.12)
 
+set(PICO_TOOLCHAIN_PATH /opt/gcc-arm-none-eabi/bin)
 # NOTE: this must happen before project()
 include(pico-sdk/pico_sdk_init.cmake)
 
 project(picolino C CXX ASM)
+
+# set(CMAKE_C_COMPILER /opt/gcc-arm-none-eabi/bin/arm-none-eabi-gcc)
+# set(CMAKE_CXX_COMPILER /opt/gcc-arm-none-eabi/bin/arm-none-eabi-g++)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
