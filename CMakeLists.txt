@@ -24,7 +24,12 @@ pico_sdk_init()
 
 add_compile_options(
     -Wall
+    -Wextra
+    -Wconversion
     -Os
     )
 
-add_subdirectory(blinky)
+add_subdirectory(
+    # blinky
+    accel
+    )
