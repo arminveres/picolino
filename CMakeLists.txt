@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 
 set(PICO_TOOLCHAIN_PATH /opt/gcc-arm-none-eabi/bin)
 # NOTE: this must happen before project()
-include(pico-sdk/pico_sdk_init.cmake)
+include(libs/pico-sdk/pico_sdk_init.cmake)
 
 project(picolino C CXX ASM)
 
@@ -21,6 +21,8 @@ set(PICO_EXAMPLES_PATH ${PROJECT_SOURCE_DIR})
 pico_sdk_init()
 
 # rest of your project
+
+# include_directories(libs/ael)
 
 add_compile_options(
     -Wall
