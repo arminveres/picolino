@@ -31,7 +31,6 @@ add_compile_options(
     -Os
     )
 
-add_subdirectory(
-    # blinky
-    accel
-    )
+add_subdirectory(blinky)
+add_subdirectory(accel)
+add_subdirectory(helloworld)

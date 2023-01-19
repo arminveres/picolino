@@ -11,6 +11,9 @@ meaning it would be best to have a 143 OHM resistance.
 
 requires arm GNU Toolchain
 
+I recommend to install [picotool](https://github.com/raspberrypi/picotool), which is quite nice to 
+work with.
+
 ### Fedora
 
 Get toolchain: https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
@@ -29,6 +32,3 @@ Get toolchain: https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
 6. `make`
 
 ## TODO
-
-- On Fedora there is no libstdc++ for arm-none-eaby, so to install follow
-  [this link](https://lindevs.com/install-gnu-arm-embedded-toolchain-on-ubuntu/).
