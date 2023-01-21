@@ -11,48 +11,12 @@
 #include "pico/time.h"
 #include "picolino_spi.h"
 
-static constexpr uint8_t READ_OP = 0x80;
-
 // static constexpr uint8_t REG_DATAX0 = 0x32;
 // static constexpr double SENSITIVITY_2G = 1.0 / 256;  // (g/LSB)
 // static constexpr double EARTH_GRAVITY = 9.80665;     // Earth's gravity in [m/s^2]
 
-void reg_write(spi_inst_t *spi, const uint cs, const uint8_t reg, const uint8_t data) {
-    uint8_t msg[2];
+static float read_data(spi_inst_t *spi, const uint8_t cspin, uint8_t reg, bool isaccel);
 
-    // Construct message (set ~W bit low, MB bit low)
-    msg[0] = 0x00 | reg;
-    msg[1] = data;
-
-    // Write to register
-    gpio_put(cs, 0);
-    spi_write_blocking(spi, msg, 2);
-    gpio_put(cs, 1);
-}
-
-int32_t reg_read(spi_inst_t *spi, const uint8_t cs, uint8_t reg, uint8_t *buf,
-                 const uint8_t nbytes) {
-    int32_t bytes_read = 0;
-    uint8_t mb = 0;
-    if (nbytes < 1) {
-        return -1;
-    } else if (nbytes == 1) {
-        mb = 0;
-    } else {
-        mb = 1;
-    }
-    gpio_put(cs, 0);  // set chip select to low, to indicate transmission
-    // uint8_t msg = static_cast<uint8_t>(reg | READ_OP);  // construct msg
-    // uint8_t msg = static_cast<uint8_t>(READ_OP | (mb << 6) | reg);  // construct msg
-    // spi_write_blocking(spi, &msg, 1);
-    reg |= READ_OP;
-    spi_write_blocking(spi, &reg, 1);
-    sleep_ms(10);
-    bytes_read = spi_read_blocking(spi, 0, buf, nbytes);
-    gpio_put(cs, 1);  // set back to high -> not transmission
-    sleep_ms(10);
-    return bytes_read;
-}
 int main() {
     // define our pins
     static constexpr uint8_t SCK_pin = 18;
@@ -61,17 +25,19 @@ int main() {
     static constexpr uint8_t CS_pin = 17;
 
     // where to store the reads
-    int16_t acc_x;
-    int16_t acc_y;
-    int16_t acc_z;
+    // int16_t acc_x;
+    // int16_t acc_y;
+    // int16_t acc_z;
     float acc_x_f;
     float acc_y_f;
     float acc_z_f;
+    float temp;
 
     constexpr uint8_t datalen = 6;
     uint8_t data[datalen];
 
     // ael::array<uint8_t, 8> buffer;
+    // picolino::spi spiinst(picolino::DEF, 1'000'000, SCK_pin, CS_pin, TX_pin, RX_pin);
 
     // init SPI
     spi_inst_t *spi_ptr = spi0;
@@ -85,7 +51,7 @@ int main() {
     gpio_put(CS_pin, 1);
     //
     // Initialize SPI port at 1 MHz
-    spi_init(spi_ptr, 500 * 1000);
+    spi_init(spi_ptr, 1000 * 1000);
 
     // set SPI Format
     spi_set_format(spi0,        // spi instance
@@ -116,12 +82,57 @@ int main() {
             printf("Could not communicate with LIS3DH, got %d\n", data[0]);
             sleep_ms(1000);
         }
-    } else {
-        while (true) {
-            printf("isp address 0x%x\n", id);
-        }
     }
 
-    // reg_read(spi_ptr, CS_pin, regpo)
+    data[0] = 0x97;
+    reg_write(spi_ptr, CS_pin, REG_CTRL_REG1, data[0]);
+
+    // NOTE: if the block data unit is activated we can read the temperature, though the problem is, that
+    // we cannot clear the 'read' bit, so the Acceleration values stay the same.
+    // data[0] = CTRL_REG4_BDU;
+    // reg_write(spi_ptr, CS_pin, REG_CTRL_REG4, data[0]);
+
+    data[0] = (TEMP_CFG_ADC_PD | TEMP_CFG_TEMP_EN);
+    reg_write(spi_ptr, CS_pin, REG_TEMP_CFG_REG, data[0]);
+
+    sleep_ms(2000);
+
+    while (true) {
+        acc_x_f = read_data(spi_ptr, CS_pin, REG_OUT_X_H, true);
+        acc_y_f = read_data(spi_ptr, CS_pin, REG_OUT_Y_H, true);
+        acc_z_f = read_data(spi_ptr, CS_pin, REG_OUT_Z_H, true);
+        temp = read_data(spi_ptr, CS_pin, REG_OUT_ADC3_H, false);
+
+        printf("TEMPERATURE: %.3f%c C\n", temp, 176);
+        printf("Acceleration: \n");
+        printf("X: %.3fg\n", acc_x_f);
+        printf("Y: %.3fg\n", acc_y_f);
+        printf("Z: %.3fg\n", acc_z_f);
+
+        sleep_ms(500);
+        // Clear terminal
+        printf("\e[1;1H\e[2J");
+    }
     return 0;
+}
+
+static float read_data(spi_inst_t *spi, const uint8_t cspin, uint8_t reg, bool isaccel) {
+    // Read two bytes of data and store in a 16 bit data structure
+    uint8_t lsb;
+    uint8_t msb;
+    uint16_t raw_accel;
+    reg_read(spi, cspin, reg, &lsb, 1);
+    reg |= 0x01;
+    reg_read(spi, cspin, reg, &msb, 1);
+    raw_accel = static_cast<uint16_t>((msb << 8) | lsb);
+
+    float scaling;
+    float sensitivity = .004f;
+
+    if (isaccel) {
+        scaling = 64 / sensitivity;
+    } else {
+        scaling = 64;
+    }
+    return static_cast<float>(static_cast<uint16_t>(raw_accel) / scaling);
 }

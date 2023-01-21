@@ -2,6 +2,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
 add_executable(accel
     src/main.cpp
+    src/picolino_spi.cpp
     )
 
 target_include_directories(accel PUBLIC includes)
