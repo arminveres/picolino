@@ -28,15 +28,15 @@ add_compile_options(
     -Wall
     -Wextra
     -Wconversion
-    -Wpedantic
+    # -Wpedantic
     -Wshadow
     -Wdouble-promotion
     -Os
     # -Werror
-    # -mcpu=cortex-m0plus
     -mtune=cortex-m0plus
     )
 
 add_subdirectory(blinky)
 add_subdirectory(lis3dh)
 add_subdirectory(helloworld)
+add_subdirectory(hw-oled)

@@ -116,6 +116,10 @@ typedef struct {
 } PAINT_TIME;
 extern PAINT_TIME sPaint_time;
 
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
+
 // init and Clear
 void Paint_NewImage(UBYTE* image, UWORD Width, UWORD Height, UWORD Rotate, UWORD Color);
 void Paint_SelectImage(UBYTE* image);
@@ -159,5 +163,9 @@ void Paint_DrawImage1(const unsigned char* image, UWORD xStart, UWORD yStart, UW
                       UWORD H_Image);
 void Paint_BmpWindows(unsigned char x, unsigned char y, const unsigned char* pBmp,
                       unsigned char chWidth, unsigned char chHeight);
+
+#ifdef __cplusplus
+}
+#endif  // __cplusplus
 
 #endif

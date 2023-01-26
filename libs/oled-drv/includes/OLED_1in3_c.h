@@ -54,8 +54,15 @@ function:
 #define OLED_DC_0 DEV_Digital_Write(EPD_DC_PIN, 0)
 #define OLED_DC_1 DEV_Digital_Write(EPD_DC_PIN, 1)
 
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
+
 void OLED_1in3_C_Init(void);
 void OLED_1in3_C_Clear(void);
 void OLED_1in3_C_Display(const UBYTE *Image);
+#ifdef __cplusplus
+}
+#endif  // __cplusplus
 
 #endif
