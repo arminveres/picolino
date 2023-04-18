@@ -3,7 +3,6 @@
 
 #include <cstdint>
 
-#include "ael/array.h"
 #include "hardware/gpio.h"
 #include "hardware/spi.h"
 

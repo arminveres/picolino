@@ -22,7 +22,7 @@ pico_sdk_init()
 
 # rest of your project
 
-# include_directories(libs/ael)
+include_directories(libs/ael/cpp/include)
 
 add_compile_options(
     -Wall
