@@ -34,9 +34,7 @@ Get toolchain: https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
 
 1. Clone recursively with flag `--recursive` to include pico-sdk
 2. `cd picolino`
-3. `mkdir build`
-4. `cd build`
-5. `cmake ..`
-6. `make`
+3. `cmake -B build`
+5. `cmake --build build`
 
 ## TODO
