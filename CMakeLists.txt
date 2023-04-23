@@ -24,16 +24,27 @@ pico_sdk_init()
 include_directories(libs/ael/cpp/include)
 
 add_compile_options(
+    # -Werror
     -Wall
     -Wextra
     -Wconversion
-    # -Wpedantic
+    -Wpedantic
+    # note covered by above
     -Wshadow
+    -Wundef
     -Wdouble-promotion
     -Os
-    # -Werror
     -mtune=cortex-m0plus
-    )
+    -fno-common
+    -fstack-usage
+    -ffunction-sections
+    -fdata-sections
+)
+
+add_link_options(
+    -Wl,-gc-sections
+    -Wl,-print-memory-usage
+)
 
 add_subdirectory(blinky)
 add_subdirectory(lis3dh)
