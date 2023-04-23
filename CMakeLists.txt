@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
+set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
 set(PICO_TOOLCHAIN_PATH /opt/gcc-arm-none-eabi/bin)
 # NOTE: this must happen before project()
@@ -11,8 +12,6 @@ project(picolino C CXX ASM)
 
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_CXX_STANDARD 20)
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
 set(PICO_BOARD pico_w)
 set(PICO_EXAMPLES_PATH ${PROJECT_SOURCE_DIR})

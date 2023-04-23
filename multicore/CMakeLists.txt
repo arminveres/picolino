@@ -1,5 +1,3 @@
-set(CMAKE_EXPORT_COMPILE_COMMANDS on)
-
 add_executable(multicore
     src/main.cpp)
 

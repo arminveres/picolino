@@ -1,5 +1,3 @@
-set(CMAKE_EXPORT_COMPILE_COMMANDS on)
-
 add_subdirectory(../libs/oled-drv/ ../build/hw-oled)
 
 add_executable(hioled
@@ -22,6 +20,6 @@ target_link_libraries(hioled
 
 # enable usb output, disable uart
 pico_enable_stdio_usb(hioled 1)
-pico_enable_stdio_uart(hioled 1)
+pico_enable_stdio_uart(hioled 0)
 
 pico_add_extra_outputs(hioled)
