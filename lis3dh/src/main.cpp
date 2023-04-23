@@ -1,9 +1,6 @@
-// #include <cstdint>
-// #include <cstdio>
-#include <stdint.h>
-#include <stdio.h>
+#include <cstdint>
+#include <cstdio>
 
-// #include "ael/array.h"
 #include "hardware/gpio.h"
 #include "hardware/spi.h"
 #include "lis3dh/registers.h"
@@ -11,18 +8,16 @@
 #include "pico/time.h"
 #include "picolino_spi.h"
 
-// static constexpr uint8_t REG_DATAX0 = 0x32;
-// static constexpr double SENSITIVITY_2G = 1.0 / 256;  // (g/LSB)
-// static constexpr double EARTH_GRAVITY = 9.80665;     // Earth's gravity in [m/s^2]
+using namespace lis3dh::regs;
 
 static float read_data(spi_inst_t *spi, const uint8_t cspin, uint8_t reg, bool isaccel);
 
-int main() {
+auto main() -> int {
     // define our pins
-    static constexpr uint8_t SCK_pin = 18;
-    static constexpr uint8_t TX_pin = 19;
-    static constexpr uint8_t RX_pin = 16;
-    static constexpr uint8_t CS_pin = 17;
+    static constinit uint8_t SCK_pin = 18;
+    static constinit uint8_t TX_pin = 19;
+    static constinit uint8_t RX_pin = 16;
+    static constinit uint8_t CS_pin = 17;
 
     // where to store the reads
     // int16_t acc_x;
@@ -87,10 +82,9 @@ int main() {
     data[0] = 0x97;
     reg_write(spi_ptr, CS_pin, REG_CTRL_REG1, data[0]);
 
-    // NOTE: if the block data unit is activated we can read the temperature, though the problem is, that
-    // we cannot clear the 'read' bit, so the Acceleration values stay the same.
-    // data[0] = CTRL_REG4_BDU;
-    // reg_write(spi_ptr, CS_pin, REG_CTRL_REG4, data[0]);
+    // NOTE: if the block data unit is activated we can read the temperature, though the problem is,
+    // that we cannot clear the 'read' bit, so the Acceleration values stay the same. data[0] =
+    // CTRL_REG4_BDU; reg_write(spi_ptr, CS_pin, REG_CTRL_REG4, data[0]);
 
     data[0] = (TEMP_CFG_ADC_PD | TEMP_CFG_TEMP_EN);
     reg_write(spi_ptr, CS_pin, REG_TEMP_CFG_REG, data[0]);
