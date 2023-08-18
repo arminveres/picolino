@@ -7,9 +7,6 @@ include(libs/pico-sdk/pico_sdk_init.cmake)
 
 project(picolino C CXX ASM)
 
-# set(CMAKE_C_COMPILER /opt/gcc-arm-none-eabi/bin/arm-none-eabi-gcc)
-# set(CMAKE_CXX_COMPILER /opt/gcc-arm-none-eabi/bin/arm-none-eabi-g++)
-
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_CXX_STANDARD 20)
 

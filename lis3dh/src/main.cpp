@@ -37,7 +37,7 @@ auto main() -> int {
     // init SPI
     spi_inst_t *spi_ptr = spi0;
     stdio_init_all();
-    printf("Hello, world!\n");
+    std::printf("Hello, world!\n");
     sleep_ms(1000);
 
     // init Chip Select

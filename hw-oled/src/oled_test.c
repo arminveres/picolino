@@ -96,8 +96,8 @@ int OLED_1in3_C_test(void) {
 
     // Drawing on the image
     printf("Drawing:page 3\r\n");
-    Paint_DrawString_CN(10, 0, "ÄãºÃAbc", &Font12CN, WHITE, WHITE);
-    Paint_DrawString_CN(0, 20, "µç×Ó", &Font24CN, WHITE, WHITE);
+    Paint_DrawString_CN(10, 0, "Ã„Ã£ÂºÃƒAbc", &Font12CN, WHITE, WHITE);
+    Paint_DrawString_CN(0, 20, "ÂµÃ§Ã—Ã“", &Font24CN, WHITE, WHITE);
     // Show image on page3
     OLED_1in3_C_Display(BlackImage);
     DEV_Delay_ms(2000);

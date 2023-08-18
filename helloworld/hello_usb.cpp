@@ -2,11 +2,10 @@
 
 #include "pico/stdlib.h"
 
-int main() {
+[[noreturn]] int main() {
     stdio_init_all();
     while (true) {
         printf("Hello, world!\n");
         sleep_ms(1000);
     }
-    return 0;
 }

@@ -22,11 +22,9 @@ target_link_libraries(GUI PUBLIC
 
 add_library(Fonts
     src/font12.c
-    src/font12CN.c
     src/font16.c
     src/font20.c
     src/font24.c
-    src/font24CN.c
     src/font8.c)
 
 add_library(Config
