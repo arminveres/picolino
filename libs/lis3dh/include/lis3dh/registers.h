@@ -146,6 +146,6 @@ constexpr uint8_t FIFO_SRC_OVRN = 0x40;
 constexpr uint8_t FIFO_SRC_EMPTY = 0x20;
 constexpr uint8_t FIFO_SRC_FSS_MASK = 0x1f;
 
-}  // namespace regs
-}  // namespace lis3dh
-#endif  // !LIS3DH_H_
+} // namespace regs
+} // namespace lis3dh
+#endif // !LIS3DH_H_

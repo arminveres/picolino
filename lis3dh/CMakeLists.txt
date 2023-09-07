@@ -5,6 +5,7 @@ add_executable(accel
 
 target_include_directories(accel PUBLIC includes)
 target_include_directories(accel PUBLIC ../libs)
+target_include_directories(accel PUBLIC ../libs/lis3dh/include/)
 
 target_link_libraries(accel
     pico_stdlib
