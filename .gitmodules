@@ -7,3 +7,6 @@
 [submodule "libs/ael"]
 	path = libs/ael
 	url = git@github.com:arminveres/ael
+[submodule "libs/pico-oled"]
+	path = libs/pico-oled
+	url = git@github.com:arminveres/pico-oled
