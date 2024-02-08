@@ -2,7 +2,7 @@ add_executable(hello_usb
     hello_usb.cpp
     )
 
-target_link_libraries(hello_usb pico_stdlib)
+target_link_libraries(hello_usb PRIVATE pico_stdlib)
 
 # enable usb output, disable uart output
 pico_enable_stdio_usb(hello_usb 1)

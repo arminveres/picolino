@@ -24,10 +24,6 @@ auto main() -> int {
   // int16_t acc_x;
   // int16_t acc_y;
   // int16_t acc_z;
-  float acc_x_f;
-  float acc_y_f;
-  float acc_z_f;
-  float temp;
 
   constexpr uint8_t datalen = 6;
   uint8_t data[datalen];
@@ -95,10 +91,10 @@ auto main() -> int {
   sleep_ms(2000);
 
   while (true) {
-    acc_x_f = read_data(spi_ptr, CS_pin, REG_OUT_X_H, true);
-    acc_y_f = read_data(spi_ptr, CS_pin, REG_OUT_Y_H, true);
-    acc_z_f = read_data(spi_ptr, CS_pin, REG_OUT_Z_H, true);
-    temp = read_data(spi_ptr, CS_pin, REG_OUT_ADC3_H, false);
+    const static auto acc_x_f = read_data(spi_ptr, CS_pin, REG_OUT_X_H, true);
+    const static auto acc_y_f = read_data(spi_ptr, CS_pin, REG_OUT_Y_H, true);
+    const static auto acc_z_f = read_data(spi_ptr, CS_pin, REG_OUT_Z_H, true);
+    const static auto temp = read_data(spi_ptr, CS_pin, REG_OUT_ADC3_H, false);
 
     printf("TEMPERATURE: %.3f%c C\n", temp, 176);
     printf("Acceleration: \n");

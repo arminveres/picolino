@@ -41,3 +41,4 @@ build/
 .cache/
 compile_commands.json
 .vscode
+compile_comands.json

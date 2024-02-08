@@ -1,0 +1,3 @@
+# ignore some submodules
+libs/pico-sdk
+libs/pico-extras

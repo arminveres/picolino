@@ -1,6 +1,5 @@
 #include <stdio.h>
-
-#include "pico/stdlib.h"
+#include <pico/stdlib.h>
 
 [[noreturn]] int main() {
     stdio_init_all();
