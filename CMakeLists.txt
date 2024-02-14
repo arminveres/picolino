@@ -11,7 +11,7 @@ set(CMAKE_C_STANDARD 23)
 set(CMAKE_CXX_STANDARD 20)
 
 set(PICO_BOARD pico_w)
-set(PICO_EXAMPLES_PATH ${PROJECT_SOURCE_DIR})
+# set(PICO_EXAMPLES_PATH ${PROJECT_SOURCE_DIR})
 
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()

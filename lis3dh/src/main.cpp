@@ -1,132 +1,145 @@
+#include <hardware/gpio.h>
+#include <hardware/spi.h>
+#include <pico/stdlib.h>
+#include <pico/time.h>
+
 #include <cstdint>
 #include <cstdio>
 
-#include "hardware/gpio.h"
-#include "hardware/spi.h"
 #include "lis3dh/registers.h"
-#include "pico/stdlib.h"
-#include "pico/time.h"
 #include "picolino_spi.h"
 
-using namespace lis3dh::regs;
+using namespace lis3dh;
 
-static float read_data(spi_inst_t *spi, const uint8_t cspin, uint8_t reg,
-                       bool isaccel);
+/// Convert an unsigned 2 Byte to signed 16byte
+///
+///  @source: http://tpcg.io/NHmBRR
+static auto conv_signed_10bit(uint16_t inp) -> int16_t {
+    constexpr uint8_t numBits = 10;
+    uint16_t trim = inp >> (16 - numBits);
+    // printf("Assembled U16: 0x%04x\n", raw_val);
 
-auto main() -> int {
-  // define our pins
-  static constinit uint8_t SCK_pin = 18;
-  static constinit uint8_t TX_pin = 19;
-  static constinit uint8_t RX_pin = 16;
-  static constinit uint8_t CS_pin = 17;
+    int16_t convertedValueI16;
 
-  // where to store the reads
-  // int16_t acc_x;
-  // int16_t acc_y;
-  // int16_t acc_z;
-
-  constexpr uint8_t datalen = 6;
-  uint8_t data[datalen];
-
-  // ael::array<uint8_t, 8> buffer;
-  // picolino::spi spiinst(picolino::DEF, 1'000'000, SCK_pin, CS_pin, TX_pin,
-  // RX_pin);
-
-  // init SPI
-  spi_inst_t *spi_ptr = spi0;
-  stdio_init_all();
-  std::printf("Hello, world!\n");
-  sleep_ms(1000);
-
-  // init Chip Select
-  gpio_init(CS_pin);
-  gpio_set_dir(CS_pin, GPIO_OUT);
-  gpio_put(CS_pin, 1);
-  //
-  // Initialize SPI port at 1 MHz
-  spi_init(spi_ptr, 1000 * 1000);
-
-  // set SPI Format
-  spi_set_format(spi0,       // spi instance
-                 8,          // No. bits per transfer
-                 SPI_CPOL_1, // Polarity
-                 SPI_CPHA_1, // Phase
-                 SPI_MSB_FIRST);
-
-  // Init other pins
-  gpio_set_function(SCK_pin, GPIO_FUNC_SPI);
-  gpio_set_function(TX_pin, GPIO_FUNC_SPI);
-  gpio_set_function(RX_pin, GPIO_FUNC_SPI);
-
-  // throwaway read to make SCK high
-  reg_read(spi_ptr, CS_pin, REG_WHO_AM_I, data, 1);
-
-  // read device id
-  uint8_t id;
-  int read = reg_read(spi_ptr, CS_pin, REG_WHO_AM_I, &id, 1);
-  printf("got %d\n", id);
-  printf("isp address 0x%x\n", id);
-
-  if (id != WHO_AM_I) {
-    while (true) {
-      printf("isp address 0x%x\n", id);
-      printf("should be: %d\n", WHO_AM_I);
-      printf("read: %d, got %d\n", read, data[0]);
-      printf("Could not communicate with LIS3DH, got %d\n", data[0]);
-      sleep_ms(1000);
+    // Need to handle negative number
+    if ((trim & (0x0001 << (numBits - 1))) == (0x0001 << (numBits - 1))) {
+        convertedValueI16 = ~trim;                        // invert bits
+        convertedValueI16 &= (0xFFFF >> (16 - numBits));  // but keep just the 10-bits
+        convertedValueI16 += 1;                           // add 1
+        convertedValueI16 *= -1;                          // multiply by -1
+        // NOTE: that the last two lines could be replaced by convertedValueI16 =
+        // ~convertedValueI16;
+    } else {
+        // positive number, just pass it through
+        convertedValueI16 = static_cast<int16_t>(trim);
     }
-  }
-
-  data[0] = 0x97;
-  reg_write(spi_ptr, CS_pin, REG_CTRL_REG1, data[0]);
-
-  // NOTE: if the block data unit is activated we can read the temperature,
-  // though the problem is, that we cannot clear the 'read' bit, so the
-  // Acceleration values stay the same. data[0] = CTRL_REG4_BDU;
-  // reg_write(spi_ptr, CS_pin, REG_CTRL_REG4, data[0]);
-
-  data[0] = (TEMP_CFG_ADC_PD | TEMP_CFG_TEMP_EN);
-  reg_write(spi_ptr, CS_pin, REG_TEMP_CFG_REG, data[0]);
-
-  sleep_ms(2000);
-
-  while (true) {
-    const static auto acc_x_f = read_data(spi_ptr, CS_pin, REG_OUT_X_H, true);
-    const static auto acc_y_f = read_data(spi_ptr, CS_pin, REG_OUT_Y_H, true);
-    const static auto acc_z_f = read_data(spi_ptr, CS_pin, REG_OUT_Z_H, true);
-    const static auto temp = read_data(spi_ptr, CS_pin, REG_OUT_ADC3_H, false);
-
-    printf("TEMPERATURE: %.3f%c C\n", temp, 176);
-    printf("Acceleration: \n");
-    printf("X: %.3fg\n", acc_x_f);
-    printf("Y: %.3fg\n", acc_y_f);
-    printf("Z: %.3fg\n", acc_z_f);
-
-    sleep_ms(500);
-    // Clear terminal
-    printf("\e[1;1H\e[2J");
-  }
-  return 0;
+    // printf("Method #1: Converted I16: %i\n", convertedValueI16);
+    // // result: -425 = 0xFE57 = [1111 1110 0101 0111]
+    return convertedValueI16;
 }
 
-static float read_data(spi_inst_t *spi, const uint8_t cspin, uint8_t reg,
-                       bool isaccel) {
-  // Read two bytes of data and store in a 16 bit data structure
-  uint8_t lsb;
-  uint8_t msb;
-  uint16_t raw_accel;
-  reg_read(spi, cspin, reg, &lsb, 1);
-  reg |= 0x01;
-  reg_read(spi, cspin, reg, &msb, 1);
-  raw_accel = static_cast<uint16_t>((msb << 8) | lsb);
+static auto read_data(spi_inst_t *spi, const uint8_t cspin, uint8_t reg) -> int16_t {
+    // Read two bytes of data and store in a 16 bit data structure
+    uint8_t lsb;
+    uint8_t msb;
+    uint16_t raw_val;
 
-  float scaling;
+    reg_read(spi, cspin, reg, &lsb, 1);
+    reg |= 0x01;
+    reg_read(spi, cspin, reg, &msb, 1);
+    raw_val = static_cast<uint16_t>((msb << 8) | lsb);
 
-  if (isaccel) {
-    constexpr float sensitivity = .004f;
-    scaling = 64 / sensitivity;
-  } else {
-    scaling = 64;
-  }
-  return static_cast<float>(static_cast<uint16_t>(raw_accel) / scaling);
+    return conv_signed_10bit(raw_val);
+}
+
+[[noreturn]] auto main() -> int {
+    // define our pins
+    static constinit uint8_t RX_pin = 16;
+    static constinit uint8_t CS_pin = 17;
+    static constinit uint8_t SCK_pin = 18;
+    static constinit uint8_t TX_pin = 19;
+
+    constexpr uint8_t datalen = 6;
+    uint8_t data[datalen];
+
+    // ael::array<uint8_t, 8> buffer;
+    // picolino::spi spiinst(picolino::DEF, 1'000'000, SCK_pin, CS_pin, TX_pin,
+    // RX_pin);
+
+    // init SPI
+    const auto spi_ptr = spi0;
+    stdio_init_all();
+    std::printf("Hello, world!\n");
+    sleep_ms(1000);
+
+    // init Chip Select
+    gpio_init(CS_pin);
+    gpio_set_dir(CS_pin, GPIO_OUT);
+    gpio_put(CS_pin, 1);
+    //
+    // Initialize SPI port at 10 MHz
+    spi_init(spi_ptr, 10000 * 1000);
+
+    // set SPI Format
+    spi_set_format(spi_ptr, 8, SPI_CPOL_1, SPI_CPHA_1, SPI_MSB_FIRST);
+
+    // Init other pins
+    gpio_set_function(SCK_pin, GPIO_FUNC_SPI);
+    gpio_set_function(TX_pin, GPIO_FUNC_SPI);
+    gpio_set_function(RX_pin, GPIO_FUNC_SPI);
+
+    // throwaway read to make SCK high
+    reg_read(spi_ptr, CS_pin, regs::REG_WHO_AM_I, data, 1);
+
+    // read device id
+    uint8_t id;
+    int read = reg_read(spi_ptr, CS_pin, regs::REG_WHO_AM_I, &id, 1);
+    // printf("got %d\n", id);
+    // printf("isp address 0x%x\n", id);
+
+    if (id != regs::WHO_AM_I) {
+        while (true) {
+            printf("isp address 0x%x\n", id);
+            printf("should be: %d\n", regs::WHO_AM_I);
+            printf("read: %d, got %d\n", read, data[0]);
+            printf("Could not communicate with LIS3DH, got %d\n", data[0]);
+            sleep_ms(1000);
+        }
+    }
+
+    // NOTE: if the block data unit is activated we can read the temperature,
+    // though the problem is, that we cannot clear the 'read' bit, so the
+    // Acceleration values stay the same. data[0] = CTRL_REG4_BDU;
+    // reg_write(spi_ptr, CS_pin, REG_CTRL_REG4, data[0]);
+
+    data[0] = regs::CTRL_REG4_BDU;
+    reg_write(spi_ptr, CS_pin, regs::REG_CTRL_REG4, data[0]);
+
+    data[0] = (regs::TEMP_CFG_ADC_PD | regs::TEMP_CFG_TEMP_EN);
+    reg_write(spi_ptr, CS_pin, regs::REG_TEMP_CFG_REG, data[0]);
+
+    sleep_ms(1000);
+
+    while (true) {
+        uint8_t lsb = 0;
+        uint8_t msb = 0;
+        reg_read(spi_ptr, CS_pin, regs::REG_OUT_ADC3_L, &lsb, 1);
+        reg_read(spi_ptr, CS_pin, regs::REG_OUT_ADC3_H, &msb, 1);
+        uint16_t temp = static_cast<uint16_t>(msb << 8) | lsb;
+        printf("TEMPERATURE: %hd C\n", conv_signed_10bit(temp));
+
+        const auto acc_x_l = read_data(spi_ptr, CS_pin, regs::REG_OUT_X_L);
+        const auto acc_y_l = read_data(spi_ptr, CS_pin, regs::REG_OUT_Y_L);
+        const auto acc_z_l = read_data(spi_ptr, CS_pin, regs::REG_OUT_Z_L);
+
+        printf("Acceleration: \n");
+        printf("X: %d\n", acc_x_l);
+        printf("Y: %d\n", acc_y_l);
+        printf("Z: %d\n", acc_z_l);
+
+        sleep_ms(250);
+
+        // Clear terminal
+        printf("\e[1;1H\e[2J");
+    }
 }
