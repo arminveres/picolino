@@ -18,7 +18,10 @@ pico_sdk_init()
 
 # rest of your project
 
-include_directories(libs/ael/cpp/include)
+set(AEL_USE_PICO_SDK true)
+set(AEL_BOARD pico_w)
+set(AEL_TOOLCHAIN_PATH /opt/gcc-arm-none-eabi/bin)
+add_subdirectory(libs/ael)
 
 add_compile_options(
     # -Werror
