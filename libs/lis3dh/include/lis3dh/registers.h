@@ -40,6 +40,10 @@ struct regs {
     static constexpr uint8_t REG_INT1_SRC = 0x31;
     static constexpr uint8_t REG_INT1_THS = 0x32;
     static constexpr uint8_t REG_INT1_DURATION = 0x33;
+    static constexpr uint8_t REG_INT2_CFG = 0x34;
+    static constexpr uint8_t REG_INT2_SRC = 0x35;
+    static constexpr uint8_t REG_INT2_THS = 0x36;
+    static constexpr uint8_t REG_INT2_DURATION = 0x37;
     static constexpr uint8_t REG_CLICK_CFG = 0x38;
     static constexpr uint8_t REG_CLICK_SRC = 0x39;
     static constexpr uint8_t REG_CLICK_THS = 0x3a;

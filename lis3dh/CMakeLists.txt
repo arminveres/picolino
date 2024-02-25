@@ -8,9 +8,10 @@ target_include_directories(accel PUBLIC ../libs)
 target_include_directories(accel PUBLIC ../libs/lis3dh/include/)
 
 target_link_libraries(accel
+    ael
     pico_stdlib
     hardware_spi
-    )
+)
 
 # enable usb output, disable uart
 pico_enable_stdio_usb(accel 1)

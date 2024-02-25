@@ -14,7 +14,7 @@ set(PICO_BOARD pico_w)
 # set(PICO_EXAMPLES_PATH ${PROJECT_SOURCE_DIR})
 
 # initialize the Raspberry Pi Pico SDK
-pico_sdk_init()
+# pico_sdk_init()
 
 # rest of your project
 
@@ -46,8 +46,8 @@ add_link_options(
     -Wl,-print-memory-usage
 )
 
-add_subdirectory(blinky)
+# add_subdirectory(blinky)
 add_subdirectory(lis3dh)
-add_subdirectory(helloworld)
-add_subdirectory(hw-oled)
-add_subdirectory(multicore)
+# add_subdirectory(helloworld)
+# add_subdirectory(hw-oled)
+# add_subdirectory(multicore)
