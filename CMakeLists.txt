@@ -1,27 +1,20 @@
 cmake_minimum_required(VERSION 3.12)
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
-set(PICO_TOOLCHAIN_PATH /opt/gcc-arm-none-eabi/bin)
-# NOTE: this must happen before project()
-include(libs/pico-sdk/pico_sdk_init.cmake)
+include(./libs/ael/external/pico-sdk/pico_sdk_init.cmake)
 
-project(picolino C CXX ASM)
-
-set(CMAKE_C_STANDARD 23)
-set(CMAKE_CXX_STANDARD 20)
-
-set(PICO_BOARD pico_w)
-# set(PICO_EXAMPLES_PATH ${PROJECT_SOURCE_DIR})
-
-# initialize the Raspberry Pi Pico SDK
-# pico_sdk_init()
-
-# rest of your project
-
+# NOTE(aver): setup of pico-sdk and other important libs before the project init
 set(AEL_USE_PICO_SDK true)
 set(AEL_BOARD pico_w)
-set(AEL_TOOLCHAIN_PATH /opt/gcc-arm-none-eabi/bin)
+set(AEL_TOOLCHAIN_PATH /opt/gcc-arm-none-eabi)
 add_subdirectory(libs/ael)
+
+project(picolino
+    LANGUAGES C CXX ASM
+    VERSION 0.1.0
+)
+set(CMAKE_C_STANDARD 23)
+set(CMAKE_CXX_STANDARD 23)
 
 add_compile_options(
     # -Werror
@@ -47,7 +40,11 @@ add_link_options(
 )
 
 # add_subdirectory(blinky)
-add_subdirectory(lis3dh)
 # add_subdirectory(helloworld)
 # add_subdirectory(hw-oled)
 # add_subdirectory(multicore)
+
+pico_sdk_init()
+
+add_subdirectory(ael-test)
+# add_subdirectory(lis3dh)

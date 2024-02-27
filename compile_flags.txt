@@ -1,0 +1,2 @@
+/opt/gcc-arm-none-eabi/bin/arm-none-eabi-g++
+-std=c++23
