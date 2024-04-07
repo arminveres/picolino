@@ -1,6 +1,6 @@
 add_executable(hioled
     src/main.cpp
-    src/oled_test.c
+    # src/oled_test.c
     src/ImageData.c
 )
 
@@ -14,14 +14,12 @@ target_include_directories(hioled PUBLIC ../libs/ael/cpp/includes/)
 
 
 target_link_libraries(hioled
+    pico-oled-fonts
+    pico-oled-paint
+
     pico_stdlib
     hardware_spi
     hardware_i2c
-    # oled driver
-    pico-oled-main
-    pico-oled-gui
-    pico-oled-fonts
-    pico-oled-config
 )
 
 # enable usb output, disable uart

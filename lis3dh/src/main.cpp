@@ -5,9 +5,9 @@
 
 #include <cstdint>
 #include <cstdio>
-#include <cstring>
 
-#include "ael/cpp/includes/ael/boards/pico/spi.hpp"
+#include "ael/boards/pi_pico/spi.hpp"
+#include "ael/peripherals/lis3dh/lis3dh.hpp"
 #include "ael/types.hpp"
 #include "lis3dh/registers.h"
 
@@ -42,7 +42,8 @@ static auto convert_signed_bit(u16 inp) -> i16 {
 }
 
 [[noreturn]] auto main() -> int {
-    using namespace ael::boards::pico::spi;
+    using namespace ael::boards::pi_pico::spi;
+    using namespace ael::peripherals::lis3dh;
 
     stdio_init_all();
 
@@ -135,38 +136,11 @@ static auto convert_signed_bit(u16 inp) -> i16 {
             continue;
         }
 
-        // static u8 ldata[6] = {0};
-        // spi.rread<1>(regs::REG_OUT_X_L, &ldata[0]);
-        // spi.rread<1>(regs::REG_OUT_X_H, &ldata[1]);
-        // spi.rread<1>(regs::REG_OUT_Y_L, &ldata[2]);
-        // spi.rread<1>(regs::REG_OUT_Y_H, &ldata[3]);
-        // spi.rread<1>(regs::REG_OUT_Z_L, &ldata[4]);
-        // spi.rread<1>(regs::REG_OUT_Z_H, &ldata[5]);
-
-        // for (size_t i = 0; i < 6; i++) {
-        //     printf("%03d ", ldata[i]);
-        // }
-        // printf("\n");
-
-        // u8 rxl, rxh, ryl, ryh, rzl, rzh;
-        // spi.rread<1>(regs::REG_OUT_X_L, &rxl);
-        // spi.rread<1>(regs::REG_OUT_X_H, &rxh);
-        // spi.rread<1>(regs::REG_OUT_Y_L, &ryl);
-        // spi.rread<1>(regs::REG_OUT_Y_H, &ryh);
-        // spi.rread<1>(regs::REG_OUT_Z_L, &rzl);
-        // spi.rread<1>(regs::REG_OUT_Z_H, &rzh);
-        // 
-        // u16 rawx = static_cast<u16>((rxh << 8) | (rxl));
-        // u16 rawy = static_cast<u16>((ryh << 8) | (ryl));
-        // u16 rawz = static_cast<u16>((rzl << 8) | (rzh));
-
-
         u16 rawx, rawy, rawz;
         spi.rread<2>(regs::REG_OUT_X_L, (u8*)&rawx);
         spi.rread<2>(regs::REG_OUT_Y_L, (u8*)&rawy);
         spi.rread<2>(regs::REG_OUT_Z_L, (u8*)&rawz);
-
-        printf("RAW: x: %d, y: %d, z: %d\n", rawx, rawy, rawz);
+        // printf("RAW: x: %d, y: %d, z: %d\n", rawx, rawy, rawz);
         auto conx = convert_signed_bit<10>(rawx);
         auto cony = convert_signed_bit<10>(rawy);
         auto conz = convert_signed_bit<10>(rawz);
